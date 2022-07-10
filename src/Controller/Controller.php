@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Helper\Helper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('deal', name: 'deal')]
@@ -17,7 +18,7 @@ class Controller extends AbstractController
     }
 
     #[Route('/buy/{qty}', name: 'get', methods: [Request::METHOD_GET])]
-    public function getAll(int $qty)
+    public function buy(int $qty): Response
     {
          $helper = new Helper();
         return $helper->buy($qty);

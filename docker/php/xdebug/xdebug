@@ -1,0 +1,56 @@
+#! /bin/bash
+
+DOT_ENV_PASS="$(pwd)/../../../.env"
+COMPOSE_PROJECT_NAME=$(cat $DOT_ENV_PASS | grep COMPOSE_PROJECT_NAME | sed -En "s/COMPOSE_PROJECT_NAME=(.*)/\1/p")
+
+# Grab full name of php container
+PHP_FPM_CONTAINER=$(docker ps | grep ${COMPOSE_PROJECT_NAME}_php | awk '{print $1}')
+
+xdebug_status() {
+  echo 'Xdebug status'
+
+  docker exec -it "$PHP_FPM_CONTAINER" sh -c 'php -v'
+}
+
+xdebug_start() {
+  echo 'Start Xdebug'
+
+  # Uncomment line with Xdebug extension
+  ON_CMD="sed -i 's/^;zend_extension=/zend_extension=/g' /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini"
+
+  docker exec -it $PHP_FPM_CONTAINER sh -c "${ON_CMD}"
+  docker restart $PHP_FPM_CONTAINER
+  docker exec -it $PHP_FPM_CONTAINER sh -c 'php -v'
+}
+
+xdebug_stop() {
+  echo 'Stop Xdebug'
+
+  # Comment out Xdebug extension line
+  OFF_CMD="sed -i 's/^zend_extension=/;zend_extension=/g' /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini"
+
+  docker exec -it $PHP_FPM_CONTAINER sh -c "${OFF_CMD}"
+  docker restart $PHP_FPM_CONTAINER
+  docker exec -it $PHP_FPM_CONTAINER sh -c 'php -v'
+}
+
+case $@ in
+stop | STOP)
+  xdebug_stop
+  ;;
+start | START)
+  xdebug_start
+  ;;
+status | STATUS)
+  xdebug_status
+  ;;
+*)
+  echo "Xdebug [Stop | Start | Status] in the ${PHP_FPM_CONTAINER} container."
+  echo "Xdebug must have already been installed."
+  echo "Usage:"
+  echo "php/xdebug stop|start|status"
+  ;;
+
+esac
+
+exit 0

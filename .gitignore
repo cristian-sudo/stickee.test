@@ -11,10 +11,7 @@
 /.idea/
 ###< IDE ###
 
-###> Intercambio ##
 /.env
-/docker-compose.override.yml
-###< Intercambio ##
 
 ###> friendsofphp/php-cs-fixer ###
 /.php-cs-fixer.cache
